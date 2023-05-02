@@ -3,6 +3,7 @@ import AirportModel from './AirportModel';
 import EventBus from '../lib/EventBus';
 import { EVENT } from '../constants/eventNames';
 import { STORAGE_KEY } from '../constants/storageKeys';
+import { isNull } from 'lodash';
 
 /**
  * Responsible for maintaining references to all the available airports
@@ -141,6 +142,8 @@ class AirportController {
      * @param airportJson {object} [default=null]
      */
     airport_set(icao, airportJson = null) {
+        if (!isNull(this.current)) return;
+
         if (this.hasStoredIcao(icao)) {
             icao = localStorage[STORAGE_KEY.ATC_LAST_AIRPORT];
         }

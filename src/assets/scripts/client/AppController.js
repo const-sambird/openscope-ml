@@ -23,6 +23,7 @@ import { speech_init } from './speech';
 import { EVENT } from './constants/eventNames';
 import { SELECTORS } from './constants/selectors';
 import { TRACKABLE_EVENT } from './constants/trackableEvents';
+import AgentController from './ai/AgentController';
 
 /**
  * Root controller class
@@ -57,6 +58,7 @@ export default class AppController {
         this.inputController = null;
         this.canvasController = null;
         this.changelogController = null;
+        this.agentController = null;
 
         return this._init()
             .setupHandlers()
@@ -127,6 +129,7 @@ export default class AppController {
         this.airportGuideController = null;
         this.inputController = null;
         this.canvasController = null;
+        this.agentController = null;
 
         return this;
     }
@@ -193,6 +196,7 @@ export default class AppController {
         this.airportInfoController = new AirportInfoController(this.$element);
         this.airportGuideController = new AirportGuideViewController(this.$element, airportGuideData, initialAirportData.icao);
         this.changelogController = new ChangelogController(this.contentQueue);
+        this.agentController = new AgentController(this.aircraftController);
 
         this.updateViewControls();
     }
