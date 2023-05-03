@@ -5,6 +5,7 @@ import TimeKeeper from '../engine/TimeKeeper';
 import UiController from '../ui/UiController';
 import { km, radiansToDegrees } from '../utilities/unitConverters';
 import { getOffset } from '../math/flightMath';
+import { abs } from '../math/core';
 
 /**
  * A single agent in the game
@@ -46,6 +47,15 @@ export default class AgentModel {
          * @type {StateModel}
          */
         this.nextState = '';
+
+        /**
+         * If we should remove this agent on the next state update
+         *
+         * @for AgentModel
+         * @property shouldRemove
+         * @type {boolean}
+         */
+        this.shouldRemove = false;
     }
 
     /**
@@ -73,6 +83,10 @@ export default class AgentModel {
             return false;
         }
 
+        const distanceToRunway = runwayModel.positionModel.distanceToPosition(this.aircraftModel.positionModel);
+
+        if (distanceToRunway > 30 || distanceToRunway < 15) return false;
+
         const minimumGlideslopeInterceptAltitude = runwayModel.getMinimumGlideslopeInterceptAltitude();
 
         // this, rather presumptuously, assumes that altitude won't change between these states
@@ -86,22 +100,23 @@ export default class AgentModel {
         }
 
         // we should be checking that
-        // (1) the aircraft is within 25 miles of the runway
-        // (2) the aircraft's heading is within 90 degrees of the runway heading
-        const aircraftHeading = radiansToDegrees(this.aircraftModel.heading);
+        // (1) the aircraft is within 15 miles of the runway
+        // (2) the aircraft's heading is within 40 degrees of the runway heading
+        // (3) the aircraft's bearing is within 40 degrees of the runway heading
+        const aircraftBearing = radiansToDegrees(runwayModel.positionModel.bearingFromPosition(this.aircraftModel.positionModel));
         const runwayHeading = radiansToDegrees(runwayModel.angle);
-        const headingDifference = runwayHeading - aircraftHeading;
+        const headingDifference = runwayHeading - aircraftBearing;
 
-        // effectively we're allowing the heading to deviate by 45 degrees each way
-        // for a total of 90
-        if (headingDifference < -45 || headingDifference > 45) {
+        // effectively we're allowing the heading to deviate by 10 degrees each way
+        // for a total of 20
+        if (headingDifference < -10 || headingDifference > 10) {
             return false;
         }
 
-        const runwayPosition = runwayModel.positionModel.relativePosition;
-        const [lat, long, distanceToRunway] = getOffset(this.aircraftModel, runwayPosition);
+        const aircraftHeading = radiansToDegrees(this.aircraftModel.heading);
+        const difference = aircraftHeading - runwayHeading;
 
-        if (distanceToRunway > km(25)) return false;
+        if (abs(difference) < 20) return false;
 
         UiController.ui_log(`${this.id} is able to intercept ${runwayModel.name}`, false);
 

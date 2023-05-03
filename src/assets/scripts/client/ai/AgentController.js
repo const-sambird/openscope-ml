@@ -15,8 +15,17 @@ import {
 import { choose } from '../utilities/generalUtilities';
 import AgentModel from './AgentModel';
 import AircraftModel from '../aircraft/AircraftModel';
-import { EVENT } from '../constants/eventNames';
+import {
+    EVENT,
+    AIRCRAFT_EVENT
+} from '../constants/eventNames';
 import UiController from '../ui/UiController';
+import TimeKeeper from '../engine/TimeKeeper';
+import { TIME } from '../constants/globalConstants';
+import {
+    DISTANCE_RANGE,
+    HEADING_RANGE
+} from './StateModel';
 
 export default class AgentController {
     constructor(aircraftController) {
@@ -121,8 +130,9 @@ export default class AgentController {
         this._aircraftAddedHandler = this.aircraftAdded.bind(this);
         this._aircraftRemovedHandler = this.aircraftRemoved.bind(this);
 
-        this._eventBus.on(EVENT.AIRSPACE_ENTER, this._aircraftAddedHandler);
+        this._eventBus.on(AIRCRAFT_EVENT.AIRSPACE_ENTER, this._aircraftAddedHandler);
         this._eventBus.on(EVENT.ADD_AIRCRAFT, this._aircraftAddedHandler);
+        this._eventBus.on(AIRCRAFT_EVENT.AIRSPACE_EXIT, this._aircraftRemovedHandler);
         this._eventBus.on(EVENT.REMOVE_AIRCRAFT, this._aircraftRemovedHandler);
 
         return this;
@@ -142,6 +152,10 @@ export default class AgentController {
      * This method ruins the rest of the game loop.
      */
     update() {
+        if (TimeKeeper.accumulatedDeltaTime % (TIME.ONE_MINUTE_IN_SECONDS * 10) === 0) {
+            this._printValuesToConsole();
+        }
+
         const stateUpdates = [];
 
         forOwn(this.agents, (agent, id) => {
@@ -156,7 +170,7 @@ export default class AgentController {
             const oldPos = agent.lastState.position ?? null;
             const nextPos = agent.nextState.position;
 
-            if (agent.lastState) {
+            if (agent.lastState && agent.nextState) {
                 const bearing = radiansToDegrees(oldPos.bearingToPosition(nextPos));
 
                 let action;
@@ -181,6 +195,11 @@ export default class AgentController {
 
                 this.transition(agent.lastState, action, agent.nextState, reward);
                 UiController.ui_log(`${agent.aircraftModel.callsign}: ((${agent.lastState.minDistance}, ${agent.lastState.startHeading}), ${action}) => (${agent.nextState.minDistance}, ${agent.nextState.startHeading}) = ${reward}`);
+            }
+
+            if (agent.shouldRemove) {
+                delete this.agents[agent.aircraftModel.id];
+                continue;
             }
 
             agent.lastState = agent.nextState;
@@ -224,7 +243,8 @@ export default class AgentController {
      * @param {AircraftModel} aircraft
      */
     aircraftRemoved(aircraft) {
-        delete this.agents[aircraft.id];
+        const agent = this.agents[aircraft.id];
+        if (agent) agent.shouldRemove = true;
     }
 
     /**
@@ -373,5 +393,32 @@ export default class AgentController {
         }
 
         return legalMoves;
+    }
+
+    /**
+     * Saves a record of the q-values to the console.
+     * Run once every ten minutes of in-game time.
+     *
+     * @for AgentController
+     * @method _printValuesToConsole
+     */
+    _printValuesToConsole() {
+        const printable_values = {};
+
+        forOwn(this.values, (value, key) => {
+            const state = this.stateController.getStateById(key);
+            const printable_key = `${state.minDistance}-${state.startHeading}`;
+
+            printable_values[printable_key] = value;
+        });
+
+        const s = {
+            icao: this.airport.icao,
+            distance_range: DISTANCE_RANGE,
+            heading_range: HEADING_RANGE,
+            values: printable_values
+        };
+
+        console.log(JSON.stringify(s));
     }
 }

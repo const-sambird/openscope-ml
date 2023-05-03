@@ -106,6 +106,11 @@ export default class StateController {
         const distanceFromAirport = this._airportPosition.distanceToPosition(positionModel);
         const closestPositionMatch = floor(distanceFromAirport / DISTANCE_RANGE) * DISTANCE_RANGE;
 
+        if (!this._states[closestPositionMatch]) {
+            // probably an aircraft that's spawned too far away
+            return false;
+        }
+
         for (const state of this._states[closestPositionMatch]) {
             if (state.positionIsInState(positionModel)) {
                 return state;

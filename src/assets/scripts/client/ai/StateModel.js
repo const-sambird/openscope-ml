@@ -13,7 +13,7 @@ import { degreesToRadians, radiansToDegrees } from '../utilities/unitConverters'
  * @property DISTANCE_RANGE
  * @constant
  */
-export const DISTANCE_RANGE = 1;
+export const DISTANCE_RANGE = 5;
 
 /**
  * The range from `startHeading` that each StateModel should encompass.
