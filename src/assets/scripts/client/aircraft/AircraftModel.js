@@ -1239,6 +1239,9 @@ export default class AircraftModel {
                 ],
                 this.pilotVoice
             );
+
+            // this would be terrible if it was actually intended for prod
+            EventBus.trigger(AIRCRAFT_EVENT.AIRSPACE_ENTER, this);
         } else {
             UiController.ui_log(`${AirportController.airport_get().radio.twr}, ${this.callsign}, ready to taxi`);
             speech_say(

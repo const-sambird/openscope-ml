@@ -2747,7 +2747,7 @@
             "altitude": 20000,
             "speed": 240,
             "method": "random",
-            "rate": 8.81,
+            "rate": 1,
             "airlines": [
                 ["aee", 1],
                 ["afl/short", 1],
@@ -2780,7 +2780,7 @@
             "altitude": 20000,
             "speed": 240,
             "method": "random",
-            "rate": 1.38,
+            "rate": 1,
             "airlines": [
                 ["baw/short", 6],
                 ["bel/short", 1],
@@ -2810,7 +2810,7 @@
             "altitude": 18000,
             "speed": 300,
             "method": "random",
-            "rate": 5.43,
+            "rate": 1,
             "airlines": [
                 ["baw/short", 6],
                 ["bel/short", 1],
@@ -2855,7 +2855,7 @@
             "altitude": [15000, 29000],
             "speed": 320,
             "method": "random",
-            "rate": 1.47,
+            "rate": 1,
             "airlines": [
                 ["abr/aerLingus", 1],
                 ["ein/long", 1],
@@ -2875,7 +2875,7 @@
             "altitude": [25000, 35000],
             "speed": 350,
             "method": "random",
-            "rate": 1.91,
+            "rate": 1,
             "airlines": [
                 ["aal/long", 4],
                 ["aca/long", 2],
@@ -2894,7 +2894,7 @@
             "altitude": 14000,
             "speed": 250,
             "method": "random",
-            "rate": 2.25,
+            "rate": 1,
             "airlines": [
                 ["bti/bcs3", 1],
                 ["cpa", 1],
@@ -2915,7 +2915,7 @@
             "altitude": 9000,
             "speed": 240,
             "method": "random",
-            "rate": 0.26,
+            "rate": 1,
             "airlines": [
                 ["log/eidw", 1],
                 ["stk/einRegional", 3]

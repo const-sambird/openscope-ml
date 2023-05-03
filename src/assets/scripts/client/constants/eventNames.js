@@ -373,5 +373,14 @@ export const AIRCRAFT_EVENT = {
      * @property AIRSPACE_EXIT
      * @type {string}
      */
-    AIRSPACE_EXIT: 'airspace-exit'
+    AIRSPACE_EXIT: 'airspace-exit',
+
+    /**
+     * Triggered when an aircraft becomes controllable.
+     *
+     * @memberof AIRCRAFT_EVENT
+     * @property AIRSPACE_ENTER
+     * @type {string}
+     */
+    AIRSPACE_ENTER: 'airspace-enter'
 };

@@ -92,7 +92,7 @@ export default class StateController {
                 count += 1;
             }
         }
-        window.states = this._states;
+
         UiController.ui_log(`built ${count} states.`, false);
     }
 

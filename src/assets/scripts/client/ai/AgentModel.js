@@ -28,6 +28,24 @@ export default class AgentModel {
          * a unique id for this agent
          */
         this.id = aircraftModel.id;
+
+        /**
+         * The last state we saw this agent in
+         *
+         * @for AgentModel
+         * @property lastState
+         * @type {StateModel}
+         */
+        this.lastState = false;
+
+        /**
+         * The state that this agent is moving to
+         *
+         * @for AgentModel
+         * @property nextState
+         * @type {StateModel}
+         */
+        this.nextState = '';
     }
 
     /**
@@ -60,7 +78,10 @@ export default class AgentModel {
         // this, rather presumptuously, assumes that altitude won't change between these states
         // but the variance shouldn't be massive between two states, so it's probably fine
         if (this.aircraftModel.mcp.altitude < minimumGlideslopeInterceptAltitude) {
-            console.warn(`${this.id} can't intercept the ILS runway ${runwayModel.name} because altitude is too low; this shouldn't be possible!`);
+            // eslint-disable-next-line max-len
+            const warning = `${this.id} can't intercept the ILS runway ${runwayModel.name} because altitude is too low; this shouldn't be possible!`;
+            console.warn(warning);
+            UiController.ui_log(warning, true);
             return false;
         }
 
@@ -68,7 +89,7 @@ export default class AgentModel {
         // (1) the aircraft is within 25 miles of the runway
         // (2) the aircraft's heading is within 90 degrees of the runway heading
         const aircraftHeading = radiansToDegrees(this.aircraftModel.heading);
-        const runwayHeading = radiansToDegrees(this.runwayModel.heading);
+        const runwayHeading = radiansToDegrees(runwayModel.angle);
         const headingDifference = runwayHeading - aircraftHeading;
 
         // effectively we're allowing the heading to deviate by 45 degrees each way
