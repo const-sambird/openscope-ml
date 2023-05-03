@@ -14,7 +14,7 @@ import { getOffset } from '../math/flightMath';
  * @class AgentModel
  */
 export default class AgentModel {
-    constructor(aircraftModel, alpha, epsilon, discount) {
+    constructor(aircraftModel) {
         /**
          * a reference to the AircraftModel this agent is 'flying'
          *
@@ -23,33 +23,6 @@ export default class AgentModel {
          * @type {AircraftModel}
          */
         this.aircraftModel = aircraftModel;
-
-        /**
-         * the learning rate, alpha
-         *
-         * @for AgentModel
-         * @property alpha
-         * @type {Number}
-         */
-        this.alpha = alpha;
-
-        /**
-         * the exploration rate, epsilon
-         *
-         * @for AgentModel
-         * @property epsilon
-         * @type {Number}
-         */
-        this.epsilon = epsilon;
-
-        /**
-         * the discount rate (living penalty)
-         *
-         * @for AgentModel
-         * @property discount
-         * @type {Number}
-         */
-        this.discount = discount;
 
         /**
          * a unique id for this agent

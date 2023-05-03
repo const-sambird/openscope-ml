@@ -1,3 +1,4 @@
+import { max } from 'lodash';
 import AircraftController from '../aircraft/AircraftController';
 import AirportController from '../airport/AirportController';
 import { FLIGHT_CATEGORY } from '../constants/aircraftConstants';
@@ -5,6 +6,8 @@ import EventBus from '../lib/EventBus';
 import { isWithin } from '../math/core';
 import { radiansToDegrees } from '../utilities/unitConverters';
 import StateController from './StateController';
+import { DISCOUNT_RATE, EXPLORATION_RATE, HEADINGS, LEARNING_RATE } from './aiConstants';
+import { choose } from '../utilities/generalUtilities';
 
 export default class AgentController {
     constructor(aircraftController) {
@@ -49,6 +52,33 @@ export default class AgentController {
          */
         this.values = {};
 
+        /**
+         * the learning rate, alpha
+         *
+         * @for AgentModel
+         * @property alpha
+         * @type {Number}
+         */
+        this.alpha = LEARNING_RATE;
+
+        /**
+         * the exploration rate, epsilon
+         *
+         * @for AgentModel
+         * @property epsilon
+         * @type {Number}
+         */
+        this.epsilon = EXPLORATION_RATE;
+
+        /**
+         * the discount rate (living penalty)
+         *
+         * @for AgentModel
+         * @property discount
+         * @type {Number}
+         */
+        this.discount = DISCOUNT_RATE;
+
         // TODO: jsdoc
         this.arrivalRunway = this.airport.getActiveRunwayForCategory(FLIGHT_CATEGORY.ARRIVAL);
 
@@ -80,7 +110,7 @@ export default class AgentController {
      * This method ruins the rest of the game loop.
      */
     update() {
-        const a = 1;
+
     }
 
     /**
@@ -123,12 +153,69 @@ export default class AgentController {
      */
     computeActionFromQValues(state) {
         const legalActions = this.getLegalActions(state);
-        const bestActions = [];
-        const qMax = Number.MIN_VALUE;
+        let bestActions = [];
+        let qMax = Number.MIN_VALUE;
 
         if (legalActions.length === 0) {
             return false;
         }
+
+        for (const action of legalActions) {
+            const q = this.getQValue(state, action);
+            if (q > qMax) {
+                qMax = q;
+                bestActions = [action];
+            } else if (q === qMax) {
+                bestActions.push(action);
+            }
+        }
+
+        return choose(bestActions);
+    }
+
+    /**
+     * Chooses an action to take in the current state.
+     * With the probability epsilon, we should take a random legal
+     * action (explore); otherwise we should just take the best action.
+     *
+     * @for AgentController
+     * @method getAction
+     * @param {String} state the state id
+     * @returns {Number|false} the action, or false if none exists
+     */
+    getAction(state) {
+        const legalActions = this.getLegalActions(state);
+        if (legalActions.length === 0) return false;
+
+        if (Math.random() < this.epsilon) {
+            return choose(legalActions);
+        }
+
+        return this.computeActionFromQValues(state);
+    }
+
+    /**
+     * Updates a single (state, action) => nextState transition.
+     *
+     * @for AgentController
+     * @method transition
+     * @param {String} state the state id
+     * @param {Number} action the new heading
+     * @param {String} nextState the next state id
+     * @param {Number} reward this transition reward
+     */
+    transition(state, action, nextState, reward = 0) {
+        if (!(state in this.values)) {
+            this.values[state] = {};
+            for (const heading of HEADINGS) {
+                this.values[state][heading] = 0;
+            }
+        }
+
+        const sample = reward + (this.discount * this.computeValueFromQValues(nextState));
+        const current = this.getQValue(state, action);
+
+        this.values[state][action] = ((1 - this.alpha) * current) + (this.alpha * sample);
     }
 
     /**
@@ -148,5 +235,31 @@ export default class AgentController {
         const arrivalHeadingCondition = isWithin(bearingToRunway - this.runwayHeading, -45, 45);
 
         if (arrivalDistanceCondition && arrivalHeadingCondition) return [];
+
+        // if this isn't the outermost ring of states, we can move in any direction
+        if (stateModel.minDistance !== max(Object.keys(this.stateController.states))) {
+            return [HEADINGS.NORTH, HEADINGS.EAST, HEADINGS.SOUTH, HEADINGS.WEST];
+        }
+
+        const legalMoves = [];
+        const heading = stateModel.startHeading;
+
+        if (heading < 90 || heading > 270) {
+            // south is ok!
+            legalMoves.push(HEADINGS.SOUTH);
+        } else {
+            // north is ok!
+            legalMoves.push(HEADINGS.NORTH);
+        }
+
+        if (heading < 180) {
+            // west is ok!
+            legalMoves.push(HEADINGS.WEST);
+        } else {
+            // east is ok!
+            legalMoves.push(HEADINGS.EAST);
+        }
+
+        return legalMoves;
     }
 }

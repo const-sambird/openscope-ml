@@ -267,6 +267,7 @@ export default class AppController {
      * @method updatePost
      */
     updatePost() {
+        this.agentController.update();
         this.canvasController.canvasUpdatePost();
         this.aircraftController.updateAircraftStrips();
     }

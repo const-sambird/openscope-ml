@@ -53,6 +53,10 @@ export default class StateController {
             .enable();
     }
 
+    get states() {
+        return this._states;
+    }
+
     init() {
         this._buildStates();
 
@@ -79,10 +83,6 @@ export default class StateController {
 
         let count = 1;
 
-        // push the state centred on the airport first
-        this._states[0] = new StateModel(0, 0, this._airportModel);
-
-        // now continue for each DISTANCE_INTERVAL from the airport
         for (let distance = 0; distance < MAX_DISTANCE; distance += DISTANCE_INTERVAL) {
             this._states[distance] = [];
             for (let heading = 0; heading < 360; heading += HEADING_INTERVAL) {
@@ -92,7 +92,7 @@ export default class StateController {
                 count += 1;
             }
         }
-
+        window.states = this._states;
         UiController.ui_log(`built ${count} states.`, false);
     }
 
@@ -105,10 +105,6 @@ export default class StateController {
     getStateByPosition(positionModel) {
         const distanceFromAirport = this._airportPosition.distanceToPosition(positionModel);
         const closestPositionMatch = floor(distanceFromAirport / DISTANCE_RANGE) * DISTANCE_RANGE;
-
-        if (closestPositionMatch === 0) {
-            return this._states[0];
-        }
 
         for (const state of this._states[closestPositionMatch]) {
             if (state.positionIsInState(positionModel)) {
