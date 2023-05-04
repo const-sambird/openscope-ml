@@ -12,7 +12,7 @@ export const LEARNING_RATE = 0.2;
 /**
  * The exploration rate for an agent, epsilon
  */
-export const EXPLORATION_RATE = 0.8;
+export const EXPLORATION_RATE = 0;
 
 /**
  * The discount factor (how much we penalise the agent for staying alive)

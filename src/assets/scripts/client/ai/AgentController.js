@@ -421,4 +421,45 @@ export default class AgentController {
 
         console.log(JSON.stringify(s));
     }
+
+    /**
+     * Sets the values array from the one printed to the console
+     * in `_printValuesToConsole`.
+     *
+     * @for AgentController
+     * @method _setValues
+     * @param {String} json
+     */
+    _setValues(json) {
+        const values = JSON.parse(json);
+
+        if (values.icao !== this.airport.icao) {
+            console.warn(`couldn't set values; these are for ${values.icao} and we're at ${this.airport.icao}`);
+            return;
+        }
+
+        if (values.distance_range !== DISTANCE_RANGE) {
+            console.warn(`couldn't set values; these have a distance range of ${values.distance_range} and we have ${DISTANCE_RANGE}`);
+            return;
+        }
+
+        if (values.heading_range !== HEADING_RANGE) {
+            console.warn(`couldn't set values; these have a distance range of ${values.heading_range} and we have ${HEADING_RANGE}`);
+            return;
+        }
+
+        forOwn(values.values, (value, key) => {
+            let [minDistance, startHeading] = key.split('-');
+            minDistance = Number(minDistance);
+            startHeading = Number(startHeading);
+
+            if (!this.stateController.states[minDistance]) return;
+
+            this.stateController.states[minDistance].forEach((state) => {
+                if (state.startHeading === startHeading) {
+                    this.values[state.id] = value;
+                }
+            });
+        });
+    }
 }
