@@ -11,3 +11,13 @@ This is my final project for CS 5013: Artifical Intelligence at the University o
 Most of the modifications are made in the [`ai/`](./src/assets/scripts/client/ai/) folder. Some consequential modifications were made to the AppController (to instantiate the new classes) and the AirportController (to disallow changing the airport, which would break everything).
 
 `einn.json` is a copy of the Q-values after several hours of learning. They can be reloaded into the simulation through the console, as the `AgentController` is attached to the window and has a method which accepts a JSON string of Q-values.
+
+# Running the project
+
+```
+$ npm install
+$ npm run build
+$ npm run server
+```
+
+Navigate to http://localhost:3003
